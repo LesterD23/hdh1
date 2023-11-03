@@ -42,8 +42,8 @@ int main() {
 	BYTE MFTentry[DEFAULT_SIZE_OF_MFTENTRY];
 	ReadSector(DEFAULT_DISK, readPoint, MFTentry, DEFAULT_SIZE_OF_MFTENTRY);
 
-	int cnt = SIZE_OF_MFT - 1;
-	while (cnt--)
+	int cnt = SIZE_OF_MFT ;
+	while (--cnt)
 	{
 		NTFS_FILE tmpFile;
 		tmpFile.getFile(MFTentry);
@@ -57,8 +57,10 @@ int main() {
 	for (auto& i : FilesList)
 	{
 		// i.printFile_Info(); cout << endl;
-		i.printFile_Name();
-		// i.printFile_Data();
+		// i.printFile_Name();
+		if (i.getName()[0] == '$' || i.getStatus() == 0 || i.getStatus() == 0)
+			continue;
+		i.printFile_Data();
 	}
 	cout << endl;
 

@@ -36,6 +36,11 @@ void NTFS_FILE::getFile(BYTE sectors[]) {
     // _size = 
 
     // To-do: thêm thuộc tính _flag, đọc trong standard_information
+    string readPoint = read_offset("14", 2, sectors);
+    while (true) {
+
+    }
+
 
 }
 
@@ -54,7 +59,8 @@ void NTFS_FILE::printFile_Name() {
 
 void NTFS_FILE::printFile_Data()
 {
-    cout << this->findData();
+    //cout << this->findData();
+    findData();
     cout << endl;
 }
 
@@ -144,9 +150,9 @@ string NTFS_FILE::findData() {
                 // This is the Data
                 if (!non_resident_flag) {
                     data = MFT_Name(Dec2Hex(Hex2Dec(temp_offset) + Hex2Dec(attribute_data_offset)), attribute_data_length, tempMFT);
-                    // cout << endl;
-                    // cout << "Data: " << data << endl;
-                    // cout << "Size: " << dec << attribute_data_length << endl;
+                    cout << endl;
+                    cout << "Data: " << data << endl;
+                    cout << "Size: " << dec << attribute_data_length << endl;
                 }
                 else {
                     size = attribute_size - 32;
@@ -162,8 +168,8 @@ string NTFS_FILE::findData() {
                     long long fragment_cluster = 0;
                     long long total_clusters = 0;
 
-                    // cout << endl;
-                    // cout << "Data: ";
+                    cout << endl;
+                    cout << "Data: ";
 
                     for (int i = (int)attribute_ext_3.length() - 1; i >= 0; i--) {
                         // Read fragmented data
@@ -188,8 +194,8 @@ string NTFS_FILE::findData() {
                             data += tempData;
                         }
                     }
-                    // cout << data << endl;
-                    // cout << "Size: " << total_clusters * sectors_per_cluster * bytes_per_sector << endl;
+                    cout << data << endl;
+                    cout << "Size: " << total_clusters * sectors_per_cluster * bytes_per_sector << endl;
                 }
             }
             temp_offset = Dec2Hex(Hex2Dec(temp_offset) + attribute_size);
