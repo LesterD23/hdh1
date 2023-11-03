@@ -4,51 +4,61 @@
 int main() {
 	cout << "NTFS\n";
 
-// read first sector of NTFS disk
-	const int sizeOfVBR = 512;
-	BYTE VBR[sizeOfVBR];
-	ReadSector(L"\\\\.\\E:", (long long) 0, VBR, sizeOfVBR);
+// read first part of NTFS disk - VBR
+	const int SIZE_OF_VBR = 512;
+	const LPCWSTR DEFAULT_DISK = L"\\\\.\\E:";
+	BYTE VBR[SIZE_OF_VBR];
+	ReadSector(DEFAULT_DISK, (long long) 0, VBR, SIZE_OF_VBR);
 
-// Get neccessary info in VBR - BPB
-	const int sectorSize = Hex2Dec(read_offset("0B", 2, VBR));
-	// const int startSectorOfLogic_Disk = Hex2Dec(read_offset("1C", 4, VBR_Sector1));
-	const int sectorPerCluster = Hex2Dec(read_offset("0D", 1, VBR));;
-	const int startClusterOfMFT = Hex2Dec(read_offset("30", 8, VBR));
-	// const int sizeOfMFT_entry = pow(2, abs(Dec2TwoComp(Hex2Dec(read_offset("40", 1, VBR_Sector1)))));
-	// const int startSectorOfMFT = startSectorOfLogic_Disk + startClusterOfMFT * sectorPerCluster;
-	const int startSectorOfMFT = startClusterOfMFT * sectorPerCluster;
+// Get main_info in VBR - BPB: 73 bytes
+	const int SIZE_OF_SECTOR = Hex2Dec(read_offset("0B", 2, VBR));
 
-// Special value
-	const int sizeOfMFTentry = 1024;
-	const int maxReadPoint = 2147483136; // ???
-	long long readPoint = (long long)startSectorOfMFT * (long long)sectorSize;
+	const int SECTORS_PER_CLUSTER = Hex2Dec(read_offset("0D", 1, VBR));
 
-// get list of NFT entry
+	const int START_CLUSTER_OF_MFT = Hex2Dec(read_offset("30", 8, VBR));
+	const long long START_SECTOR_OF_MFT = (long long)START_CLUSTER_OF_MFT * (long long)SECTORS_PER_CLUSTER;
+
+	const int DEFAULT_SIZE_OF_MFTENTRY = 1024; // Hex2Dec(read_offset("40", 1, VBR));
+
+	// const int MAX_READPOINT = 2147483136; // ???
+
+	long long readPoint = START_SECTOR_OF_MFT * (long long)SIZE_OF_SECTOR;
+
+// Read first entry (file) of MFT - $MFT
+	BYTE sectorOf$MFT[DEFAULT_SIZE_OF_MFTENTRY];
+	ReadSector(DEFAULT_DISK, readPoint, sectorOf$MFT, DEFAULT_SIZE_OF_MFTENTRY);
+	readPoint += DEFAULT_SIZE_OF_MFTENTRY;
+
+	NTFS_FILE fileOf$MFT;
+	fileOf$MFT.getFile(sectorOf$MFT);
+
+	string readPoint_$MFTAttr = read_offset("14", 2, sectorOf$MFT);
+	const int SIZE_OF_MFT = 64 * 8 / 2; //To-do: get MFT size in $MFT
+
+// Get list of MFT entry 
 	vector<NTFS_FILE> FilesList;
-	BYTE MFTentry[sizeOfMFTentry];
-	ReadSector(L"\\\\.\\E:", readPoint, MFTentry, sizeOfMFTentry);
+	FilesList.push_back(fileOf$MFT);
 
-	int cnt = 64 * 8 / 2;
-	while (cnt--/*read_offset_unicode("00", 4, MFTentry) == "FILE" || read_offset_unicode("00", 4, MFTentry) == "BAAD"*/)
+	BYTE MFTentry[DEFAULT_SIZE_OF_MFTENTRY];
+	ReadSector(DEFAULT_DISK, readPoint, MFTentry, DEFAULT_SIZE_OF_MFTENTRY);
+
+	int cnt = SIZE_OF_MFT - 1;
+	while (cnt--)
 	{
-		NTFS_FILE tmp;
-		tmp.getFile(MFTentry);
-		tmp.setDrive(L"\\\\.\\E:");
-		FilesList.push_back(tmp);
+		NTFS_FILE tmpFile;
+		tmpFile.getFile(MFTentry);
+		FilesList.push_back(tmpFile);
 
 		readPoint += 1024;
-		ReadSector(L"\\\\.\\E:", readPoint, MFTentry, sizeOfMFTentry);
-
+		ReadSector(DEFAULT_DISK, readPoint, MFTentry, DEFAULT_SIZE_OF_MFTENTRY);
 	}
 
-// print files list
+// Print files list
 	for (auto& i : FilesList)
 	{
-		//i.printFile();
-		i.printFileName();
-		if (i.getName()[0] == '$' || i.getStatus() == 0 || i.getStatus() == 2)
-			continue;
-		i.data(L"\\\\.\\E:", i.getId());
+		// i.printFile_Info(); cout << endl;
+		i.printFile_Name();
+		// i.printFile_Data();
 	}
 	cout << endl;
 

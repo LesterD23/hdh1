@@ -4,6 +4,9 @@
 class NTFS_FILE
 {
 private:
+	CONST LPCWSTR DEFAULT_DRIVE = L"\\\\.\\E:";
+
+private:
 	int _id;
 	string _name;
 	LPCWSTR _drive;
@@ -30,12 +33,13 @@ public:
 
 public:
 	void getFile(BYTE sectors[]);
-	void printFile();
-	void printFileName();
+	void printFile_Info();
+	void printFile_Name();
+	void printFile_Data();
 
 public:
-	string filename(const BYTE MFT[1024]);
-	void data(LPCWSTR drive, long long id);
+	string findFileName(const BYTE MFT[1024]);
+	string findData();
 
 };
 

@@ -57,10 +57,6 @@ void PrintSector(const BYTE sectors[], int bytesNum) {
 	}
 }
 
-/*int getValue_Sector(const BYTE sectors[], string startOffset, int bytesBum) {
-	int tmp =
-}*/
-
 string read_offset(string offset, int bytesNum, const BYTE sector[]) {
 
 	stringstream builder;
@@ -68,6 +64,7 @@ string read_offset(string offset, int bytesNum, const BYTE sector[]) {
 	int start_index = stoi(offset, 0, 16);
 	int end_index = start_index + (bytesNum - 1);
 
+	builder.clear();
 
 	for (int i = 0; i < bytesNum; i++) {
 
@@ -78,13 +75,10 @@ string read_offset(string offset, int bytesNum, const BYTE sector[]) {
 }
 
 string read_offset_raw(string offset, int bytesNum, const BYTE sector[]) {
-
 	stringstream builder;
-
 	int start_index = stoi(offset, 0, 16);
 
 	for (int i = 0; i < bytesNum; i++) {
-
 		builder << hex << setw(2) << setfill('0') << int(sector[start_index + i]);
 	}
 
@@ -165,23 +159,6 @@ string Dec2Hex(long long decVal) {
 	}
 	reverse(ans.begin(), ans.end());
 	return ans;
-}
-
-string read_offset_MFT(string offset, int n, const BYTE MFT[1024]) {
-
-	stringstream builder;
-
-	int start_index = stoi(offset, 0, 16);
-	int end_index = start_index + (n - 1);
-
-	builder.clear();
-
-	for (int i = 0; i < n; i++) {
-
-		builder << hex << setw(2) << setfill('0') << int(MFT[end_index - i]);
-	}
-
-	return builder.str();
 }
 
 string MFT_Name(string offset, long long size, const BYTE MFT[1024]) {
