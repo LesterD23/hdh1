@@ -42,7 +42,7 @@ int main() {
 	BYTE MFTentry[DEFAULT_SIZE_OF_MFTENTRY];
 	ReadSector(DEFAULT_DISK, readPoint, MFTentry, DEFAULT_SIZE_OF_MFTENTRY);
 
-	int cnt = SIZE_OF_MFT ;
+	int cnt = SIZE_OF_MFT;
 	while (--cnt)
 	{
 		NTFS_FILE tmpFile;
@@ -56,13 +56,38 @@ int main() {
 // Print files list
 	for (auto& i : FilesList)
 	{
-		// i.printFile_Info(); cout << endl;
-		// i.printFile_Name();
-		if (i.getName()[0] == '$' || i.getStatus() == 0 || i.getStatus() == 0)
-			continue;
-		i.printFile_Data();
+		if (i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
+		{
+			// i.printFile_Info(); cout << endl;
+		}
+
+		if (i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
+		{
+			// i.printFile_Name();
+			// i.printFile_Data();
+		}
 	}
 	cout << endl;
+
+// Create folder tree
+	vector<vector<NTFS_FILE>> folderTree(FilesList.size());
+	for (auto& i : FilesList) 
+	{
+		if (i.getId() != 5 && i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
+		{
+			//i.printFile_Info(); cout << endl;
+			folderTree[i.getIdParent()].push_back(i);
+		}
+	}
+
+// Print root of folder tree
+	cout << "Root of folder tree:\n";
+	const int ID_OF_ROOT = 5;
+	for (auto& i : folderTree[ID_OF_ROOT])
+	{
+		i.printFile_Name();
+		i.printFile_Info(); cout << endl;
+	}
 
 // Finished
 	system("pause");

@@ -7,15 +7,17 @@ NTFS_FILE::NTFS_FILE() {
 	_idParent = -1;
 	_status = -1;
 	_size = -1;
+    _flat = -1;
 };
 
-NTFS_FILE::NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE) {
+NTFS_FILE::NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT) {
 	_id = ID;
 	_name = NAME;
 	_drive = DRIVE;
 	_idParent = IDPARENT;
 	_status = STATUS;
 	_size = SIZE;
+    _flat = FLAT;
 }
 
 NTFS_FILE::~NTFS_FILE() {};
@@ -31,16 +33,33 @@ void NTFS_FILE::getFile(BYTE sectors[]) {
     _id = Hex2Dec(read_offset("2C", 4, sectors));
     _name = findFileName(sectors);
     _drive = DEFAULT_DRIVE;
-    // _idParent = 
     _status = Hex2Dec(read_offset("16", 2, sectors));
-    // _size = 
 
-    // To-do: thêm thuộc tính _flag, đọc trong standard_information
-    string readPoint = read_offset("14", 2, sectors);
-    while (true) {
+    // read MFT entry header
+    string startOffsetOfAttr = read_offset("14", 2, sectors);
+    string offset_attributeType = read_offset(startOffsetOfAttr, 4, sectors);
+    while (Hex2Dec(offset_attributeType) != 128)
+    {
+        int sizeOfAttribute = 16 + Hex2Dec(read_offset(Dec2Hex(Hex2Dec(startOffsetOfAttr) + 16), 4, sectors));
 
+        startOffsetOfAttr = Dec2Hex(Hex2Dec(startOffsetOfAttr) + sizeOfAttribute);
+        offset_attributeType = read_offset(startOffsetOfAttr, 4, sectors);
     }
 
+    // read $standard_information attr: lay gia tri cua _flat
+    // string startOffsetOfAttr_Content = read_offset(Dec2Hex(Hex2Dec(startOffsetOfAttr) + 20), 2, sectors);
+
+    // string startOffsetOfAttr_Content_CountFromAttrHeader = Dec2Hex(Hex2Dec(startOffsetOfAttr) + Hex2Dec(startOffsetOfAttr_Content));
+
+    string filePermissions = read_offset("70", 4, sectors);// read_offset(Dec2Hex(Hex2Dec(startOffsetOfAttr_Content_CountFromAttrHeader) + 32), 4, sectors);
+    _flat = Hex2Dec(filePermissions);
+
+    // read $file_name atttr
+    string parentDirectories = read_offset("B0", 6, sectors);
+    _idParent = Hex2Dec(parentDirectories);
+
+    // string realSize = read_offset("178", 8, sectors);
+    // _size = Hex2Dec(realSize);
 
 }
 
@@ -51,6 +70,7 @@ void NTFS_FILE::printFile_Info() {
 	cout << "Drive: " << _drive << endl;
 	cout << "IdParent: " << _idParent << endl;
 	cout << "Status: " << _status << endl;
+    cout << "Flat: " << _flat << endl;
 }
 
 void NTFS_FILE::printFile_Name() {
@@ -202,4 +222,13 @@ string NTFS_FILE::findData() {
         }
     }
     return data;
+}
+
+
+bool NTFS_FILE::isArchive() {
+    return (_flat == 32 && _status == 1);
+}
+
+bool NTFS_FILE::isFolder() {
+    return (_status == 3);
 }

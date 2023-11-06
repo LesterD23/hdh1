@@ -13,10 +13,11 @@ private:
 	int _idParent;
 	int _status;
 	int _size;
+	int _flat;
 
 public:
 	NTFS_FILE();
-	NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE);
+	NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT);
 	~NTFS_FILE();
 
 public:
@@ -30,6 +31,7 @@ public:
 	LPCWSTR getDrive() { return _drive; }
 	int getStatus() { return _status; }
 	int getSize() { return _size; }
+	int getFlat() { return _flat; }
 
 public:
 	void getFile(BYTE sectors[]);
@@ -40,6 +42,10 @@ public:
 public:
 	string findFileName(const BYTE MFT[1024]);
 	string findData();
+
+public:
+	bool isArchive();
+	bool isFolder();
 
 };
 
