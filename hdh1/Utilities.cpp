@@ -96,6 +96,47 @@ string read_offset_unicode(string offset, int bytesNum, const BYTE sector[]) {
 	return builder.str();
 }
 
+wstring clean_wstring(wstring s) {
+
+    wstring result;
+    for (auto character : s) {
+        if (character != L'\0')
+            result.push_back(character);
+
+    }
+    return result;
+}
+
+wstring Unicode_Name(string s) {
+	wstring result;
+
+	for (int i = 0; i < s.length(); i++) {
+		if (int(s[i]) == 255)
+			break;
+		wchar_t wideChar = static_cast<wchar_t>(s[i]);
+		result += wideChar;
+	}
+
+	return clean_wstring(result);
+}
+
+wstring read_offset_wide_string(string offset, int n, const BYTE* sectors) {
+
+	wstring result;
+
+
+	for (int i = 0; i < n; i++) {
+		if (int((sectors[stoi(offset, 0, 16) + i])) == 255)
+			break;
+
+		wchar_t wideChar = static_cast<wchar_t>(sectors[stoi(offset, 0, 16) + i]);
+		result += wideChar;
+	}
+
+
+	return clean_wstring(result);
+}
+
 int Hex2Dec(string hex) {
 
 	int res = 0;
@@ -166,6 +207,7 @@ string MFT_Name(string offset, long long size, const BYTE MFT[1024]) {
 	int start_index = stoi(offset, 0, 16);
 
 	for (int i = 0; i < size; i++) {
+		if (MFT[start_index + i] != 0)
 		builder << MFT[start_index + i];
 	}
 
