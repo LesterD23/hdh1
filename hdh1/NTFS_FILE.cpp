@@ -150,7 +150,7 @@ wstring NTFS_FILE::findData() {
         bool emergency_break = false;
         string temp_offset = first_attribute_offset;
         while (read_offset(Dec2Hex(Hex2Dec(temp_offset)), 4, tempMFT) != "ffffffff" && read_offset(Dec2Hex(Hex2Dec(temp_offset)), 4, tempMFT) != "FFFFFFFF") {
-            if (this->getName().length() < 4 || this->getName().substr(this->getName().length() - 4, 4) != Unicode_Name(".txt"))
+            if (!isTXT())
                 break;
             string attribute = read_offset(temp_offset, 16, tempMFT);
             long long attribute_type_id = Hex2Dec(attribute.substr(24, 8));
@@ -229,6 +229,10 @@ bool NTFS_FILE::isArchive() {
 
 bool NTFS_FILE::isFolder() {
     return (_status == 3);
+}
+
+bool NTFS_FILE::isTXT() {
+    return (this->getName().length() >= 4 && this->getName().substr(this->getName().length() - 4, 4) == Unicode_Name(".txt"));
 }
 
 long long NTFS_FILE::realSize(const BYTE MFTEntry[1024]) {

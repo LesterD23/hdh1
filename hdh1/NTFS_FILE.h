@@ -48,7 +48,7 @@ public:
 public:
 	bool isArchive();
 	bool isFolder();
-
+	bool isTXT();
 };
 
 
