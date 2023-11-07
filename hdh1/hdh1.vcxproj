@@ -128,10 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NTFS_DISK.cpp" />
     <ClCompile Include="NTFS_FILE.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NTFS_DISK.h" />
     <ClInclude Include="NTFS_FILE.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>

@@ -42,6 +42,8 @@ public:
 public:
 	string findFileName(const BYTE MFT[1024]);
 	string findData();
+	long long realSize(const BYTE MFTEntry[1024]);
+	long long data_sector(const BYTE MFTEntry[1024]);
 
 public:
 	bool isArchive();
