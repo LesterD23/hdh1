@@ -24,7 +24,7 @@
     <ClCompile Include="Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NTFS_DISK.cpp">
+    <ClCompile Include="menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClInclude Include="Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NTFS_DISK.h">
+    <ClInclude Include="menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include "Utilities.h"
 #include "NTFS_FILE.h"
-#include "NTFS_DISK.h"
+#include "menu.h"
 
 int main() {
 	cout << "NTFS\n";
@@ -57,12 +57,14 @@ int main() {
 // Print files list
 	for (auto& i : FilesList)
 	{
-		if (i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
+		if (i.getName()[0] != '$' && (i.getStatus() == 1 || i.getStatus() == 3))
 		{
-			// i.printFile_Info(); cout << endl;
-		}
-
-		if (i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
+			//i.printFile_Info(); cout << endl;
+			//i.printFile_Name();
+			//i.printFile_Data();
+		} 
+		 
+		if (i.getId() != 5 && i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
 		{
 			//i.printFile_Name();
 			//i.printFile_Data();
@@ -76,9 +78,6 @@ int main() {
 	{
 		if (i.getId() != 5 && i.getName()[0] != '$' && (i.isArchive() || i.isFolder()))
 		{
-			// i.printFile_Info(); cout << endl;
-			i.printFile_Name();
-			i.printFile_Data();
 			folderTree[i.getIdParent()].push_back(i);
 		}
 	}
@@ -92,8 +91,12 @@ int main() {
 		i.printFile_Info(); cout << endl;
 	}
 
+	operatingMenu(FilesList , VBR, folderTree);
+
+
 // Finished
 	system("pause");
+
 
 	return 0;
 }
