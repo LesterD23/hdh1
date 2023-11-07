@@ -87,8 +87,8 @@ int main() {
 	const int ID_OF_ROOT = 5;
 	for (auto& i : folderTree[ID_OF_ROOT])
 	{
-		// i.printFile_Name();
-		//i.printFile_Info(); cout << endl;
+		i.printFile_Name();
+		i.printFile_Info(); cout << endl;
 	}
 
 	operatingMenu(FilesList , VBR, folderTree);

@@ -2,7 +2,7 @@
 
 NTFS_FILE::NTFS_FILE() {
 	_id = -1;
-	_name = "NOTHING";
+	_name = Unicode_Name("NOTHING");
 	_drive = DEFAULT_DRIVE;
 	_idParent = -1;
 	_status = -1;
@@ -10,7 +10,7 @@ NTFS_FILE::NTFS_FILE() {
     _flat = -1;
 };
 
-NTFS_FILE::NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT) {
+NTFS_FILE::NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT) {
 	_id = ID;
 	_name = NAME;
 	_drive = DRIVE;
@@ -65,7 +65,7 @@ void NTFS_FILE::getFile(BYTE sectors[]) {
 
 void NTFS_FILE::printFile_Info() {
 	cout << "Id: " << _id << endl;
-	cout << "Name: " << _name << endl;
+	wcout << "Name: " << _name << endl;
 	cout << "Size: " << _size << endl;
 	cout << "Drive: " << _drive << endl;
 	cout << "IdParent: " << _idParent << endl;
@@ -74,7 +74,7 @@ void NTFS_FILE::printFile_Info() {
 }
 
 void NTFS_FILE::printFile_Name() {
-	cout << "File: " << _name << " (Id: " << _id << ") " << endl;
+	wcout << "File: " << _name << " (Id: " << _id << ") " << endl;
 }
 
 void NTFS_FILE::printFile_Data()
@@ -84,8 +84,8 @@ void NTFS_FILE::printFile_Data()
     cout << endl;
 }
 
-string NTFS_FILE::findFileName(const BYTE MFT[1024]) {
-    string file_name;
+wstring NTFS_FILE::findFileName(const BYTE MFT[1024]) {
+    wstring file_name;
     string first_attribute_offset = read_offset("14", 2, MFT);
     string temp_offset = first_attribute_offset;
     long long next_offset = 0;
@@ -101,9 +101,7 @@ string NTFS_FILE::findFileName(const BYTE MFT[1024]) {
         attribute_size = Hex2Dec(attribute.substr(16, 8)) % 0x400;
         bool non_resident_flag = Hex2Dec(attribute.substr(14, 2));
         long long name_length = Hex2Dec(attribute.substr(12, 2));
-        string name_offset = attribute.substr(8, 4);
         string flags = attribute.substr(4, 4);
-        string attribute_id = attribute.substr(0, 4);
 
         long long size = attribute_size - 16;
         string attribute_ext_1 = read_offset(Dec2Hex(Hex2Dec(temp_offset) + 16), size, MFT);
@@ -117,7 +115,7 @@ string NTFS_FILE::findFileName(const BYTE MFT[1024]) {
             long long file_name_length = Hex2Dec(attribute_ext_2.substr((size - 65) * 2, 2));
 
             // This is the file name
-            file_name = MFT_Name(Dec2Hex(Hex2Dec(temp_offset) + 66 + Hex2Dec(attribute_data_offset)), file_name_length * 2, MFT);
+            file_name = Unicode_Name(MFT_Name(Dec2Hex(Hex2Dec(temp_offset) + 66 + Hex2Dec(attribute_data_offset)), file_name_length * 2, MFT));
             // cout << endl;
             // cout << "File name: " << file_name << endl;
             // if (file_name[0] == '$')
@@ -129,7 +127,7 @@ string NTFS_FILE::findFileName(const BYTE MFT[1024]) {
     return file_name;
 }
 
-string NTFS_FILE::findData() {
+wstring NTFS_FILE::findData() {
     BYTE sector[512], tempSector[512], tempMFT[1024];
     ReadSector(_drive, 0, sector, 512);
     string data;
@@ -152,14 +150,14 @@ string NTFS_FILE::findData() {
         bool emergency_break = false;
         string temp_offset = first_attribute_offset;
         while (read_offset(Dec2Hex(Hex2Dec(temp_offset)), 4, tempMFT) != "ffffffff" && read_offset(Dec2Hex(Hex2Dec(temp_offset)), 4, tempMFT) != "FFFFFFFF") {
+            if (!isTXT())
+                break;
             string attribute = read_offset(temp_offset, 16, tempMFT);
             long long attribute_type_id = Hex2Dec(attribute.substr(24, 8));
             attribute_size = Hex2Dec(attribute.substr(16, 8)) % 0x400;
             bool non_resident_flag = Hex2Dec(attribute.substr(14, 2));
             long long name_length = Hex2Dec(attribute.substr(12, 2));
-            string name_offset = attribute.substr(8, 4);
             string flags = attribute.substr(4, 4);
-            string attribute_id = attribute.substr(0, 4);
 
             long long size = attribute_size - 16;
             string attribute_ext_1 = read_offset(Dec2Hex(Hex2Dec(temp_offset) + 16), size, tempMFT);
@@ -221,7 +219,7 @@ string NTFS_FILE::findData() {
             temp_offset = Dec2Hex(Hex2Dec(temp_offset) + attribute_size);
         }
     }
-    return data;
+    return Unicode_Name(data);
 }
 
 
@@ -231,6 +229,10 @@ bool NTFS_FILE::isArchive() {
 
 bool NTFS_FILE::isFolder() {
     return (_status == 3);
+}
+
+bool NTFS_FILE::isTXT() {
+    return (this->getName().length() >= 4 && this->getName().substr(this->getName().length() - 4, 4) == Unicode_Name(".txt"));
 }
 
 long long NTFS_FILE::realSize(const BYTE MFTEntry[1024]) {

@@ -8,7 +8,7 @@ private:
 
 private:
 	int _id;
-	string _name;
+	wstring _name;
 	LPCWSTR _drive;
 	int _idParent;
 	int _status;
@@ -17,7 +17,7 @@ private:
 	
 public:
 	NTFS_FILE();
-	NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT);
+	NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT);
 	~NTFS_FILE();
 
 public:
@@ -26,7 +26,7 @@ public:
 
 public:
 	int getId() { return _id; }
-	string getName() { return _name; }
+	wstring getName() { return _name; }
 	int getIdParent() { return _idParent; }
 	LPCWSTR getDrive() { return _drive; }
 	int getStatus() { return _status; }
@@ -40,15 +40,15 @@ public:
 	void printFile_Data();
 
 public:
-	string findFileName(const BYTE MFT[1024]);
-	string findData();
+	wstring findFileName(const BYTE MFT[1024]);
+	wstring findData();
 	long long realSize(const BYTE MFTEntry[1024]);
 	long long data_sector(const BYTE MFTEntry[1024]);
 
 public:
 	bool isArchive();
 	bool isFolder();
-
+	bool isTXT();
 };
 
 
