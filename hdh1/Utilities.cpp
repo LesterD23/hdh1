@@ -207,7 +207,6 @@ string MFT_Name(string offset, long long size, const BYTE MFT[1024]) {
 	int start_index = stoi(offset, 0, 16);
 
 	for (int i = 0; i < size; i++) {
-		if (MFT[start_index + i] != 0)
 		builder << MFT[start_index + i];
 	}
 
