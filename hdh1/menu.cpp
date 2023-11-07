@@ -16,9 +16,9 @@ void response_4() {
 }
 
 void response_3(vector<NTFS_FILE> FilesList, const vector<vector<NTFS_FILE>>& folderTree) {
-	cout << "response 3\n";
+	cout << "\n----------------- Open File/Folder -------------------\n";
 	int tmp;
-	cout << "Nhap id: ";
+	cout << "Input Id (stop = -1): ";
 	cin >> tmp;
 	while (tmp != -1) {
 		for (auto i : FilesList)
@@ -29,42 +29,50 @@ void response_3(vector<NTFS_FILE> FilesList, const vector<vector<NTFS_FILE>>& fo
 				{
 					for (auto j : folderTree[tmp])
 					{
-						i.printFile_Info(); cout << endl;
+						j.printFile();
 					}
 				}
 				else
 				{
-					i.printFile_Name();
-					i.printFile_Data();
+					if (i.isTXT())
+					{
+						i.printFile_Name();
+						i.printFile_Data();
+					}
+					else
+					{
+						cout << "Please open by another tools.\n";
+					}
 				}
+				break;
 			}
 		}
+		cout << "Input Id (stop = -1): ";
 		cin >> tmp;
 	}
 
 }
 
 void response_2(const vector<NTFS_FILE>& folderTree) {
-	cout << "response 2\n";
-	cout << "Root of folder tree:\n";
-	const int ID_OF_ROOT = 5;
+	cout << "\n----------------- Root of folder tree -------------------\n";
+
 	for (auto i : folderTree)
 	{
-		i.printFile_Name();
-		//i.printFile_Info(); cout << endl;
+		i.printFile();
 	}
 }
 
 void fileTraversal(const vector<NTFS_FILE>& folderTree) {
 	for (auto i : folderTree)
 	{
-		i.printFile_Name();
+		i.printFile();
 		//i.printFile_Info(); cout << endl;
 	}
 }
 
 void response_1(BYTE VBR[]) {
-	cout << "response 1\n";
+	cout << "\n----------------- VBR information -------------------\n";
+
 	cout << "1. Manager Type: " << "NTFS" << endl;
 
 	int sizeOfSector = Hex2Dec(read_offset("0B", 2, VBR));
@@ -90,18 +98,6 @@ void response_1(BYTE VBR[]) {
 
 }
 
-LPCWSTR inputVolumeName() {
-	string choice = "";
-	wstring prefix = L"\\\\.\\";
-	wstring temp;
-	cout << "Input Volume Name:(Uppercase) ";
-	wcin >> temp;
-	temp = prefix + temp + L":";
-	LPCWSTR drive = temp.c_str();
-
-	return drive;
-}
-
 int getResponse() {
 	cout << "Input your choice: ";
 	int choice;
@@ -116,9 +112,21 @@ int getResponse() {
 	return choice;
 }
 
-void operatingMenu(vector<NTFS_FILE> FilesList, BYTE VBR[], const vector<vector<NTFS_FILE>>& folderTree) {
-	LPCWSTR disk = inputVolumeName();
+void operatingMenu(vector<NTFS_FILE> FilesList, const vector<vector<NTFS_FILE>>& folderTree) {
+	wstring prefix = L"\\\\.\\";
+	wstring temp;
+	cout << "Input Volume Name of NTFS (Uppercase): ";
+	wcin >> temp;
+	temp = prefix + temp + L":";
+	LPCWSTR disk = temp.c_str();
+
+	const int SIZE_OF_VBR = 512;
+	BYTE VBR[SIZE_OF_VBR];
+
+	ReadSector(disk, (long long)0, VBR, SIZE_OF_VBR);
+
 	printMenu();
+
 	int choice = getResponse();
 
 	while (choice != 0)

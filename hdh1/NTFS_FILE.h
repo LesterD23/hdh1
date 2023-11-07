@@ -14,10 +14,11 @@ private:
 	int _status;
 	int _size;
 	int _flat;
+	long long _dataSector;
 	
 public:
 	NTFS_FILE();
-	NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT);
+	NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT, long long DATASECTOR);
 	~NTFS_FILE();
 
 public:
@@ -37,6 +38,7 @@ public:
 	void getFile(BYTE sectors[]);
 	void printFile_Info();
 	void printFile_Name();
+	void printFile();
 	void printFile_Data();
 
 public:

@@ -8,9 +8,10 @@ NTFS_FILE::NTFS_FILE() {
 	_status = -1;
 	_size = -1;
     _flat = -1;
+    _dataSector = -1;
 };
 
-NTFS_FILE::NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT) {
+NTFS_FILE::NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT, long long DATASECTOR) {
 	_id = ID;
 	_name = NAME;
 	_drive = DRIVE;
@@ -18,6 +19,7 @@ NTFS_FILE::NTFS_FILE(int ID, wstring NAME, LPCWSTR DRIVE, int IDPARENT, int STAT
 	_status = STATUS;
 	_size = SIZE;
     _flat = FLAT;
+    _dataSector = DATASECTOR;
 }
 
 NTFS_FILE::~NTFS_FILE() {};
@@ -61,6 +63,7 @@ void NTFS_FILE::getFile(BYTE sectors[]) {
     // string realSize = read_offset("178", 8, sectors);
     _size = realSize(sectors);
 
+    _dataSector = data_sector(sectors);
 }
 
 void NTFS_FILE::printFile_Info() {
@@ -71,10 +74,22 @@ void NTFS_FILE::printFile_Info() {
 	cout << "IdParent: " << _idParent << endl;
 	cout << "Status: " << _status << endl;
     cout << "Flat: " << _flat << endl;
+    cout << "Start sector of data: " << _dataSector << endl;
 }
 
 void NTFS_FILE::printFile_Name() {
-	wcout << "File: " << _name << " (Id: " << _id << ") " << endl;
+    wcout << "File/Folder: " << _name << "(Id: " << _id << ") " << endl;
+}
+
+void NTFS_FILE::printFile() {
+    if (_status == 3)
+    {
+        wcout << "Folder: " << _name << " (Id: " << _id << "); " << "Size: " << _size << "; data sector: " << _dataSector << endl;
+    }
+    else
+    {
+        wcout << "File: " << _name << " (Id: " << _id << "); " << "Size: " << _size << "; data sector: " << _dataSector << endl;
+    }
 }
 
 void NTFS_FILE::printFile_Data()
@@ -83,6 +98,7 @@ void NTFS_FILE::printFile_Data()
     findData();
     cout << endl;
 }
+
 
 wstring NTFS_FILE::findFileName(const BYTE MFT[1024]) {
     wstring file_name;
@@ -214,7 +230,9 @@ wstring NTFS_FILE::findData() {
                     }
                     cout << data << endl;
                     cout << "Size: " << total_clusters * sectors_per_cluster * bytes_per_sector << endl;
+                    
                 }
+                break;
             }
             temp_offset = Dec2Hex(Hex2Dec(temp_offset) + attribute_size);
         }
@@ -234,6 +252,7 @@ bool NTFS_FILE::isFolder() {
 bool NTFS_FILE::isTXT() {
     return (this->getName().length() >= 4 && this->getName().substr(this->getName().length() - 4, 4) == Unicode_Name(".txt"));
 }
+
 
 long long NTFS_FILE::realSize(const BYTE MFTEntry[1024]) {
     long long real_size = 0;
@@ -319,9 +338,6 @@ long long NTFS_FILE::data_sector(const BYTE MFTEntry[1024]) {
                     long long cluster_count = 0;
                     long long fragment_cluster = 0;
                     long long total_clusters = 0;
-
-                    cout << endl;
-                    cout << "Data: ";
 
                     for (int i = (int)attribute_ext_3.length() - 1; i >= 0; i--) {
                         // Read fragmented data

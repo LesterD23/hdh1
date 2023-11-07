@@ -8,6 +8,12 @@
 #include <sstream>
 #include <cmath>
 #include <vector>
+#include <io.h>
+#include <fcntl.h>
+#include <codecvt>
+#include <string.h>
+#include <stack>
+#include <locale>
 
 using namespace std;
 
