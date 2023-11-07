@@ -14,7 +14,7 @@ private:
 	int _status;
 	int _size;
 	int _flat;
-
+	
 public:
 	NTFS_FILE();
 	NTFS_FILE(int ID, string NAME, LPCWSTR DRIVE, int IDPARENT, int STATUS, int SIZE, int FLAT);
